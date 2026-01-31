@@ -13,7 +13,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.ЦарскійШрифтъ">
+        android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -26,7 +26,7 @@
 
         <service
             android:name=".PreRevolutionKeyboard"
-            android:label="Дореволюціонная"
+            android:label="Царскій шрифтъ"
             android:permission="android.permission.BIND_INPUT_METHOD"
             android:exported="true">
             <intent-filter>

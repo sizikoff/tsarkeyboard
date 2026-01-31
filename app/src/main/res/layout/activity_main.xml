@@ -1,19 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:fitsSystemWindows="true"
+    android:background="#F5F5F5">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <!-- AppBarLayout для правильной работы со статус-баром -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:background="#37474F"
+        android:fitsSystemWindows="true">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#37474F"
+            app:title="Царскій шрифтъ"
+            app:titleTextColor="#FFFFFF"
+            app:titleTextAppearance="@style/ToolbarTitle" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Основной контент -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Основной текст -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Отрадно видѣть, что даже спустя столѣтіе есть люди, для которыхъ дорога или, какъ минимумъ, интересна ореографія русскаго языка до реформы 1918-го года!"
+                android:textSize="16sp"
+                android:textColor="#37474F"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="24dp" />
+
+            <!-- Инструкция -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Для включенія дореволюціонной клавіатуры выполните слѣдующіе шаги:"
+                android:textSize="16sp"
+                android:textColor="#37474F"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Шаги -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="• въ Настройкахъ устройства зайдите въ раздѣлъ Языкъ и вводъ -> Экранная клавіатура -> Управленіе клавіатурами"
+                android:textSize="14sp"
+                android:textColor="#37474F"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="• включите клавіатуру съ названіемъ Царскій шрифтъ"
+                android:textSize="14sp"
+                android:textColor="#37474F"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="24dp" />
+
+            <!-- Описание работы -->
+
+            <!-- Главная фича -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Пишите на современномъ русскомъ языкѣ, а приложеніе автоматически преобразуетъ текстъ въ дореволюціонную орѳографію при нажатіи пробѣла!"
+                android:textSize="15sp"
+                android:textColor="#1976D2"
+                android:textStyle="bold"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="16dp"
+                android:background="#E3F2FD"
+                android:padding="12dp" />
+
+            <!-- Пример -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Примѣръ:\nВы пишете: мне\nПриложеніе автоматически замѣняетъ: мнѣ"
+                android:textSize="14sp"
+                android:textColor="#37474F"
+                android:lineSpacingExtra="4dp"
+                android:fontFamily="monospace"
+                android:background="#EEEEEE"
+                android:padding="12dp"
+                android:layout_marginBottom="24dp" />
+
+            <!-- Кнопка МЕНЮ -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/menuButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="МЕНЮ"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#37474F"
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp"
+                app:cornerRadius="8dp"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Копирайт -->
+            <TextView
+                android:id="@+id/versionText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="© Ваше имя, v1.0.0"
+                android:textSize="12sp"
+                android:textColor="#757575"
+                android:gravity="center"
+                android:paddingBottom="16dp" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

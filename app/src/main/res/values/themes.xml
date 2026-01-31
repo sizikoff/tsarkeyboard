@@ -1,9 +1,17 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.ЦарскійШрифтъ" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Основная тема приложения -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">#37474F</item>
+        <item name="colorPrimaryDark">#263238</item>
+        <item name="colorAccent">#1976D2</item>
+        <item name="android:statusBarColor">#37474F</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 
-    <style name="Theme.ЦарскійШрифтъ" parent="Base.Theme.ЦарскійШрифтъ" />
+    <!-- Стиль для заголовка Toolbar -->
+    <style name="ToolbarTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>

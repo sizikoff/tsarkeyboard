@@ -8,6 +8,9 @@ android {
     compileSdk {
         version = release(36)
     }
+    buildFeatures {
+        buildConfig = true
+    }
 
     defaultConfig {
         applicationId = "com.amicus.tsarkeyboard"
