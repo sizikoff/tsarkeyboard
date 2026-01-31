@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Нажатая клавиша - светлее -->
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#5F5F5F" />
+            <corners android:radius="5dp" />
+        </shape>
+    </item>
+
+    <!-- Обычная клавиша - тёмно-серая -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#3F3F3F" />
+            <corners android:radius="5dp" />
+        </shape>
+    </item>
+</selector>
