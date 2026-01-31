@@ -1,8 +1,11 @@
 package com.amicus.tsarkeyboard
 
+import android.content.Context
 import android.inputmethodservice.InputMethodService
 import android.inputmethodservice.Keyboard
 import android.inputmethodservice.KeyboardView
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.view.KeyEvent
 import android.view.View
 
@@ -29,51 +32,92 @@ class PreRevolutionKeyboard : InputMethodService(),
     override fun onKey(primaryCode: Int, keyCodes: IntArray?) {
         val inputConnection = currentInputConnection ?: return
 
-        when (primaryCode) {
-            Keyboard.KEYCODE_SHIFT -> {
-                // Переключение Shift
-                isShifted = !isShifted
-                keyboard?.isShifted = isShifted
-                keyboardView?.invalidateAllKeys()
+        // Shift
+        if (primaryCode == -1 || primaryCode == Keyboard.KEYCODE_SHIFT) {
+            handleShift()
+            return
+        }
+
+        // Backspace
+        if (primaryCode == -5 || primaryCode == Keyboard.KEYCODE_DELETE) {
+            inputConnection.deleteSurroundingText(1, 0)
+            return
+        }
+
+        // Enter
+        if (primaryCode == 10) {
+            inputConnection.sendKeyEvent(
+                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER)
+            )
+            return
+        }
+
+        // Пробел
+        if (primaryCode == 32) {
+            inputConnection.commitText(" ", 1)
+            return
+        }
+
+        // Переключение клавиатуры
+        if (primaryCode == -100 || primaryCode == Keyboard.KEYCODE_MODE_CHANGE) {
+            try {
+                val imeManager = getSystemService(INPUT_METHOD_SERVICE)
+                        as android.view.inputmethod.InputMethodManager
+                imeManager.showInputMethodPicker()
+            } catch (e: Exception) {
+                switchToNextInputMethod(false)
             }
-            Keyboard.KEYCODE_DELETE -> {
-                inputConnection.deleteSurroundingText(1, 0)
+            return
+        }
+
+        // Обычные буквы - только валидные коды
+        if (primaryCode in 32..65535) {
+            var char = primaryCode.toChar()
+
+            if (isShifted && char.isLetter()) {
+                char = char.uppercaseChar()
+                isShifted = false
+                updateShiftState()
             }
-            10 -> {
-                inputConnection.sendKeyEvent(
-                    KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER)
-                )
-            }
-            32 -> {
-                inputConnection.commitText(" ", 1)
-                // TODO: Здесь будет автозамена слова на дореволюционное
-            }
-            Keyboard.KEYCODE_MODE_CHANGE, -100 -> {
-                try {
-                    val imeManager = getSystemService(INPUT_METHOD_SERVICE)
-                            as android.view.inputmethod.InputMethodManager
-                    imeManager.showInputMethodPicker()
-                } catch (e: Exception) {
-                    switchToNextInputMethod(false)
-                }
-            }
-            else -> {
-                var char = primaryCode.toChar()
-                // Если Shift нажат — делаем заглавную
-                if (isShifted && char.isLetter()) {
-                    char = char.uppercaseChar()
-                    isShifted = false // Автоматически отключаем Shift после ввода
-                    keyboard?.isShifted = false
-                    keyboardView?.invalidateAllKeys()
-                }
-                inputConnection.commitText(char.toString(), 1)
-            }
+
+            inputConnection.commitText(char.toString(), 1)
         }
     }
 
 
+    private fun handleShift() {
+        isShifted = !isShifted
+        updateShiftState()
+    }
+
+    private fun updateShiftState() {
+        keyboard?.let { kb ->
+            kb.isShifted = isShifted
+            keyboardView?.invalidateAllKeys()
+        }
+    }
+
     // Обязательные методы интерфейса
-    override fun onPress(primaryCode: Int) {}
+    override fun onPress(primaryCode: Int) {
+        // Короткая и ощутимая вибрация
+        try {
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                // Используем EFFECT_CLICK - стандартный клик-эффект
+                vibrator.vibrate(
+                    VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(10) // Короткая вибрация 10ms
+            }
+        } catch (e: Exception) {
+            // Игнорируем ошибки
+        }
+    }
+
+
     override fun onRelease(primaryCode: Int) {}
     override fun onText(text: CharSequence?) {}
     override fun swipeLeft() {}

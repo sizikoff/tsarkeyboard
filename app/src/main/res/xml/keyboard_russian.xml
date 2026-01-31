@@ -36,8 +36,9 @@
     </Row>
 
     <!-- Третий ряд: ⬆ я ч с м и т ь б ю ⌫ -->
+    <!-- Третий ряд: ⬆ я ч с м и т ь б ю ⌫ -->
     <Row>
-        <Key android:codes="-1" android:keyIcon="@android:drawable/arrow_up_float"
+        <Key android:codes="-1" android:keyLabel="⬆"
             android:keyWidth="13%p" android:isModifier="true" android:isSticky="true" />
         <Key android:codes="1103" android:keyLabel="я" />
         <Key android:codes="1095" android:keyLabel="ч" />
@@ -48,17 +49,20 @@
         <Key android:codes="1100" android:keyLabel="ь" />
         <Key android:codes="1073" android:keyLabel="б" />
         <Key android:codes="1102" android:keyLabel="ю" />
-        <Key android:codes="-5" android:keyIcon="@android:drawable/ic_input_delete"
+        <Key android:codes="-5" android:keyLabel="⌫"
             android:keyWidth="13%p" android:isRepeatable="true" />
     </Row>
 
+
     <!-- Четвёртый ряд: 🌐 , пробел . ↵ -->
     <Row android:rowEdgeFlags="bottom">
-        <Key android:codes="-100" android:keyIcon="@android:drawable/ic_menu_more"
+        <Key android:codes="-100" android:keyLabel="🌐"
             android:keyWidth="13%p" />
         <Key android:codes="44" android:keyLabel="," android:keyWidth="11%p" />
-        <Key android:codes="32" android:keyLabel="" android:keyWidth="48%p" />
+        <Key android:codes="32" android:keyWidth="48%p" />
         <Key android:codes="46" android:keyLabel="." android:keyWidth="11%p" />
         <Key android:codes="10" android:keyLabel="↵" android:keyWidth="13%p" />
     </Row>
+
+
 </Keyboard>
