@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/keyboard_background">
+
+    <!-- Полоса подсказки: дореформенный вариант слова (тап = вставить) -->
+    <HorizontalScrollView
+        android:id="@+id/candidateStripScroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:visibility="gone"
+        android:paddingHorizontal="8dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="4dp">
+
+        <LinearLayout
+            android:id="@+id/candidateStrip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/candidateChip"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:minWidth="80dp"
+                android:gravity="center"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:background="@drawable/candidate_chip_bg"
+                android:textColor="@color/key_text"
+                android:textSize="18sp"
+                android:visibility="gone" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <include
+        android:id="@+id/keyboardInclude"
+        layout="@layout/keyboard" />
+</LinearLayout>

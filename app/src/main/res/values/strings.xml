@@ -9,4 +9,13 @@
     <string name="pref_vibration_summary">Тактильный отклик клавиш</string>
     <string name="about_title">О программѣ</string>
     <string name="about_text">Клавіатура «Царскій шрифтъ» — въ память о Великой Княжнѣ Татьяне Николаевнѣ Романовой (1897–1918).\n\nОрѳографія русскаго языка до реформы 1918 года: буквы ѣ, ѳ, ѵ, і, твёрдый знакъ въ конце словъ.\n\nВерсія: %1$s</string>
+    <string name="my_words_title">Мои слова</string>
+    <string name="my_words_hint">Ваши пары «слово → дореформенная замена». Долгое нажатие — удалить.</string>
+    <string name="add_word">Добавить слово</string>
+    <string name="export">Экспорт</string>
+    <string name="import_label">Импорт</string>
+    <string name="add_word_dialog_title">Добавить слово</string>
+    <string name="word_hint">Современное написание</string>
+    <string name="replacement_hint">Дореформенное написание</string>
+    <string name="delete_confirm">Удалить эту пару?</string>
 </resources>

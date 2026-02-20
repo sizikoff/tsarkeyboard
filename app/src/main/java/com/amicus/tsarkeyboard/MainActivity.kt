@@ -22,6 +22,9 @@ class MainActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.menuButton).setOnClickListener {
             startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
         }
+        findViewById<MaterialButton>(R.id.myWordsButton).setOnClickListener {
+            startActivity(Intent(this, UserDictionaryActivity::class.java))
+        }
 
         findViewById<SwitchCompat>(R.id.switchAutoReplace).apply {
             isChecked = prefs.getBoolean(PreRevolutionOrthography.PREF_AUTO_REPLACE, true)

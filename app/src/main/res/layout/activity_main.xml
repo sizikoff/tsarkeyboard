@@ -217,6 +217,15 @@
                     android:layout_marginStart="12dp" />
             </LinearLayout>
 
+            <!-- Мои слова -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/myWordsButton"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/my_words_title"
+                android:layout_marginBottom="12dp" />
+
             <!-- О программе -->
             <TextView
                 android:id="@+id/aboutText"

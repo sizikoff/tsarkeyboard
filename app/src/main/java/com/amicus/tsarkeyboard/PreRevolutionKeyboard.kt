@@ -4,11 +4,14 @@ import android.content.Context
 import android.inputmethodservice.InputMethodService
 import android.inputmethodservice.Keyboard
 import android.inputmethodservice.KeyboardView
+import android.os.Handler
+import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputConnection
+import android.widget.TextView
 
 class PreRevolutionKeyboard : InputMethodService(),
     KeyboardView.OnKeyboardActionListener {
@@ -17,22 +20,84 @@ class PreRevolutionKeyboard : InputMethodService(),
     private var keyboard: Keyboard? = null
     private var isShifted = false
 
+    private val backspaceHandler = Handler(Looper.getMainLooper())
+    private var backspaceRunnable: Runnable? = null
+    private var backspaceHoldMode = false
+
+    private var candidateStripScroll: View? = null
+    private var candidateChip: TextView? = null
+    private var candidateWord: String = ""
+    private var candidateReplacement: String = ""
+
     override fun onCreate() {
         super.onCreate()
         PreRevolutionOrthography.init(applicationContext)
     }
 
     override fun onCreateInputView(): View {
-        keyboardView = layoutInflater.inflate(
-            R.layout.keyboard,
-            null
-        ) as KeyboardView
+        val container = layoutInflater.inflate(R.layout.keyboard_with_candidates, null)
+        candidateStripScroll = container.findViewById(R.id.candidateStripScroll)
+        candidateChip = container.findViewById(R.id.candidateChip)
+        keyboardView = container.findViewById(R.id.keyboardInclude) as KeyboardView
 
         keyboard = Keyboard(this, R.xml.keyboard_russian)
         keyboardView?.keyboard = keyboard
         keyboardView?.setOnKeyboardActionListener(this)
 
-        return keyboardView!!
+        candidateChip?.setOnClickListener {
+            applyCandidate()
+        }
+
+        return container
+    }
+
+    /** Вставить подсказку вместо текущего слова и скрыть полосу. */
+    private fun applyCandidate() {
+        if (candidateWord.isEmpty() || candidateReplacement.isEmpty()) return
+        val ic = currentInputConnection ?: return
+        ic.deleteSurroundingText(candidateWord.length, 0)
+        ic.commitText(candidateReplacement, 1)
+        hideCandidateStrip()
+    }
+
+    private fun showCandidateStrip(replacement: String) {
+        candidateWord = getLastWord(currentInputConnection ?: return) ?: return
+        candidateReplacement = replacement
+        candidateChip?.text = replacement
+        candidateChip?.visibility = View.VISIBLE
+        candidateStripScroll?.visibility = View.VISIBLE
+    }
+
+    private fun hideCandidateStrip() {
+        candidateWord = ""
+        candidateReplacement = ""
+        candidateStripScroll?.visibility = View.GONE
+        candidateChip?.visibility = View.GONE
+    }
+
+    /** Обновить подсказку по последнему слову перед курсором. */
+    private fun updateCandidateStrip() {
+        val ic = currentInputConnection ?: run {
+            hideCandidateStrip()
+            return
+        }
+        val word = getLastWord(ic)
+        if (word.isNullOrEmpty()) {
+            hideCandidateStrip()
+            return
+        }
+        val prefs = getSharedPreferences(PreRevolutionOrthography.PREFS_NAME, Context.MODE_PRIVATE)
+        PreRevolutionOrthography.setArchaismsEnabled(prefs.getBoolean(PreRevolutionOrthography.PREF_ARCHAISMS, false))
+        val replacement = PreRevolutionOrthography.replaceWord(word)
+        if (replacement != word) {
+            candidateWord = word
+            candidateReplacement = replacement
+            candidateChip?.text = replacement
+            candidateChip?.visibility = View.VISIBLE
+            candidateStripScroll?.visibility = View.VISIBLE
+        } else {
+            hideCandidateStrip()
+        }
     }
 
     override fun onKey(primaryCode: Int, keyCodes: IntArray?) {
@@ -44,32 +109,41 @@ class PreRevolutionKeyboard : InputMethodService(),
             return
         }
 
-        // Backspace: если есть выделение — удаляем его, иначе один символ слева
+        // Backspace: выделение → удалить; удержание (повтор) → удалить слово; иначе 1 символ
         if (primaryCode == -5 || primaryCode == Keyboard.KEYCODE_DELETE) {
             val selected = inputConnection.getSelectedText(0)
             if (!selected.isNullOrEmpty()) {
                 inputConnection.commitText("", 1)
+            } else if (backspaceHoldMode) {
+                deleteLastWord(inputConnection)
             } else {
                 inputConnection.deleteSurroundingText(1, 0)
+                backspaceRunnable?.let { backspaceHandler.removeCallbacks(it) }
+                backspaceRunnable = Runnable {
+                    backspaceHoldMode = true
+                }
+                backspaceHandler.postDelayed(backspaceRunnable!!, 500)
             }
+            updateCandidateStrip()
             return
         }
 
         // Enter — орфография и перенос строки
         if (primaryCode == 10) {
             handleWordEnd(inputConnection, "\n")
+            hideCandidateStrip()
             return
         }
 
         // Пробел, запятая, точка, ; : ? ! — подставляем орфографию перед знаком
         when (primaryCode) {
-            32 -> { handleWordEnd(inputConnection, " "); return }
-            44 -> { handleWordEnd(inputConnection, ","); return }
-            46 -> { handleWordEnd(inputConnection, "."); return }
-            59 -> { handleWordEnd(inputConnection, ";"); return }
-            58 -> { handleWordEnd(inputConnection, ":"); return }
-            63 -> { handleWordEnd(inputConnection, "?"); return }
-            33 -> { handleWordEnd(inputConnection, "!"); return }
+            32 -> { handleWordEnd(inputConnection, " "); hideCandidateStrip(); return }
+            44 -> { handleWordEnd(inputConnection, ","); hideCandidateStrip(); return }
+            46 -> { handleWordEnd(inputConnection, "."); hideCandidateStrip(); return }
+            59 -> { handleWordEnd(inputConnection, ";"); hideCandidateStrip(); return }
+            58 -> { handleWordEnd(inputConnection, ":"); hideCandidateStrip(); return }
+            63 -> { handleWordEnd(inputConnection, "?"); hideCandidateStrip(); return }
+            33 -> { handleWordEnd(inputConnection, "!"); hideCandidateStrip(); return }
         }
 
         // Переключение клавиатуры
@@ -95,6 +169,7 @@ class PreRevolutionKeyboard : InputMethodService(),
             }
 
             inputConnection.commitText(char.toString(), 1)
+            updateCandidateStrip()
         }
     }
 
@@ -132,6 +207,23 @@ class PreRevolutionKeyboard : InputMethodService(),
         return word.ifEmpty { null }
     }
 
+    /** Удаляет последнее слово перед курсором (как в GBoard при удержании Backspace). */
+    private fun deleteLastWord(inputConnection: InputConnection) {
+        val word = getLastWord(inputConnection) ?: run {
+            inputConnection.deleteSurroundingText(1, 0)
+            return
+        }
+        inputConnection.deleteSurroundingText(word.length, 0)
+    }
+
+    override fun onRelease(primaryCode: Int) {
+        if (primaryCode == -5 || primaryCode == Keyboard.KEYCODE_DELETE) {
+            backspaceRunnable?.let { backspaceHandler.removeCallbacks(it) }
+            backspaceRunnable = null
+            backspaceHoldMode = false
+        }
+    }
+
     private fun handleShift() {
         isShifted = !isShifted
         updateShiftState()
@@ -160,7 +252,6 @@ class PreRevolutionKeyboard : InputMethodService(),
     }
 
 
-    override fun onRelease(primaryCode: Int) {}
     override fun onText(text: CharSequence?) {}
     override fun swipeLeft() {}
     override fun swipeRight() {}
