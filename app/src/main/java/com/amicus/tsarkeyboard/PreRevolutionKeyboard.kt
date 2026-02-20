@@ -8,6 +8,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.InputConnection
 
 class PreRevolutionKeyboard : InputMethodService(),
     KeyboardView.OnKeyboardActionListener {
@@ -15,6 +16,11 @@ class PreRevolutionKeyboard : InputMethodService(),
     private var keyboardView: KeyboardView? = null
     private var keyboard: Keyboard? = null
     private var isShifted = false
+
+    override fun onCreate() {
+        super.onCreate()
+        PreRevolutionOrthography.init(applicationContext)
+    }
 
     override fun onCreateInputView(): View {
         keyboardView = layoutInflater.inflate(
@@ -52,9 +58,9 @@ class PreRevolutionKeyboard : InputMethodService(),
             return
         }
 
-        // Пробел
+        // Пробел: подставляем дореформенную орфографию для последнего слова
         if (primaryCode == 32) {
-            inputConnection.commitText(" ", 1)
+            handleSpace(inputConnection)
             return
         }
 
@@ -85,6 +91,38 @@ class PreRevolutionKeyboard : InputMethodService(),
     }
 
 
+    private fun handleSpace(inputConnection: InputConnection) {
+        val prefs = getSharedPreferences(PreRevolutionOrthography.PREFS_NAME, Context.MODE_PRIVATE)
+        if (!prefs.getBoolean(PreRevolutionOrthography.PREF_AUTO_REPLACE, true)) {
+            inputConnection.commitText(" ", 1)
+            return
+        }
+        PreRevolutionOrthography.setArchaismsEnabled(
+            prefs.getBoolean(PreRevolutionOrthography.PREF_ARCHAISMS, false)
+        )
+        val word = getLastWord(inputConnection) ?: run {
+            inputConnection.commitText(" ", 1)
+            return
+        }
+        val replacement = PreRevolutionOrthography.replaceWord(word)
+        if (replacement != word) {
+            inputConnection.deleteSurroundingText(word.length, 0)
+            inputConnection.commitText(replacement + " ", 1)
+        } else {
+            inputConnection.commitText(" ", 1)
+        }
+    }
+
+    /** Возвращает последнее слово перед курсором (только буквы) или null если пусто. */
+    private fun getLastWord(inputConnection: InputConnection): String? {
+        val before = inputConnection.getTextBeforeCursor(80, 0) ?: return null
+        val str = before.toString()
+        var i = str.length - 1
+        while (i >= 0 && str[i].isLetter()) i--
+        val word = str.substring(i + 1)
+        return word.ifEmpty { null }
+    }
+
     private fun handleShift() {
         isShifted = !isShifted
         updateShiftState()
@@ -114,6 +152,7 @@ class PreRevolutionKeyboard : InputMethodService(),
             }
         } catch (e: Exception) {
             // Игнорируем ошибки
+            //TODO сделать обработку вывода вмбрации на 13+
         }
     }
 

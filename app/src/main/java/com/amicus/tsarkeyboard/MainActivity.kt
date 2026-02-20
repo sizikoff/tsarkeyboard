@@ -1,4 +1,5 @@
 package com.amicus.tsarkeyboard
+
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -6,6 +7,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import com.google.android.material.button.MaterialButton
 
 class MainActivity : AppCompatActivity() {
@@ -14,12 +16,26 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Кнопка МЕНЮ
+        val prefs = getSharedPreferences(PreRevolutionOrthography.PREFS_NAME, MODE_PRIVATE)
+
         findViewById<MaterialButton>(R.id.menuButton).setOnClickListener {
             startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
         }
 
-        // Версия
+        findViewById<SwitchCompat>(R.id.switchAutoReplace).apply {
+            isChecked = prefs.getBoolean(PreRevolutionOrthography.PREF_AUTO_REPLACE, true)
+            setOnCheckedChangeListener { _, checked ->
+                prefs.edit().putBoolean(PreRevolutionOrthography.PREF_AUTO_REPLACE, checked).apply()
+            }
+        }
+
+        findViewById<SwitchCompat>(R.id.switchArchaisms).apply {
+            isChecked = prefs.getBoolean(PreRevolutionOrthography.PREF_ARCHAISMS, false)
+            setOnCheckedChangeListener { _, checked ->
+                prefs.edit().putBoolean(PreRevolutionOrthography.PREF_ARCHAISMS, checked).apply()
+            }
+        }
+
         val versionTextView = findViewById<TextView>(R.id.versionText)
         val versionName = getVersionName()
         versionTextView.text = "© Ваше имя, v$versionName"
