@@ -2,4 +2,11 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <!-- Клавиатура: тёмная, в духе GBoard -->
+    <color name="keyboard_background">#1E1E22</color>
+    <color name="key_default">#3A3A3E</color>
+    <color name="key_pressed">#545458</color>
+    <color name="key_border">#2C2C2E</color>
+    <color name="key_text">#FFFFFF</color>
+    <color name="key_preview_bg">#545458</color>
 </resources>

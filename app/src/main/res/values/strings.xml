@@ -5,4 +5,8 @@
     <string name="pref_auto_replace_summary">мне → мнѣ, стол → столъ и т.д.</string>
     <string name="pref_archaisms">Архаизмы (стилизация под старину)</string>
     <string name="pref_archaisms_summary">таксист → извозчик, машина → экипаж</string>
+    <string name="pref_vibration">Вибрация при нажатии</string>
+    <string name="pref_vibration_summary">Тактильный отклик клавиш</string>
+    <string name="about_title">О программѣ</string>
+    <string name="about_text">Клавіатура «Царскій шрифтъ» — въ память о Великой Княжнѣ Татьяне Николаевнѣ Романовой (1897–1918).\n\nОрѳографія русскаго языка до реформы 1918 года: буквы ѣ, ѳ, ѵ, і, твёрдый знакъ въ конце словъ.\n\nВерсія: %1$s</string>
 </resources>

@@ -44,24 +44,32 @@ class PreRevolutionKeyboard : InputMethodService(),
             return
         }
 
-        // Backspace
+        // Backspace: если есть выделение — удаляем его, иначе один символ слева
         if (primaryCode == -5 || primaryCode == Keyboard.KEYCODE_DELETE) {
-            inputConnection.deleteSurroundingText(1, 0)
+            val selected = inputConnection.getSelectedText(0)
+            if (!selected.isNullOrEmpty()) {
+                inputConnection.commitText("", 1)
+            } else {
+                inputConnection.deleteSurroundingText(1, 0)
+            }
             return
         }
 
-        // Enter
+        // Enter — орфография и перенос строки
         if (primaryCode == 10) {
-            inputConnection.sendKeyEvent(
-                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER)
-            )
+            handleWordEnd(inputConnection, "\n")
             return
         }
 
-        // Пробел: подставляем дореформенную орфографию для последнего слова
-        if (primaryCode == 32) {
-            handleSpace(inputConnection)
-            return
+        // Пробел, запятая, точка, ; : ? ! — подставляем орфографию перед знаком
+        when (primaryCode) {
+            32 -> { handleWordEnd(inputConnection, " "); return }
+            44 -> { handleWordEnd(inputConnection, ","); return }
+            46 -> { handleWordEnd(inputConnection, "."); return }
+            59 -> { handleWordEnd(inputConnection, ";"); return }
+            58 -> { handleWordEnd(inputConnection, ":"); return }
+            63 -> { handleWordEnd(inputConnection, "?"); return }
+            33 -> { handleWordEnd(inputConnection, "!"); return }
         }
 
         // Переключение клавиатуры
@@ -91,25 +99,26 @@ class PreRevolutionKeyboard : InputMethodService(),
     }
 
 
-    private fun handleSpace(inputConnection: InputConnection) {
+    /** Подставляет дореформенную орфографию для последнего слова и вставляет суффикс (пробел, запятая, точка). */
+    private fun handleWordEnd(inputConnection: InputConnection, suffix: String) {
         val prefs = getSharedPreferences(PreRevolutionOrthography.PREFS_NAME, Context.MODE_PRIVATE)
         if (!prefs.getBoolean(PreRevolutionOrthography.PREF_AUTO_REPLACE, true)) {
-            inputConnection.commitText(" ", 1)
+            inputConnection.commitText(suffix, 1)
             return
         }
         PreRevolutionOrthography.setArchaismsEnabled(
             prefs.getBoolean(PreRevolutionOrthography.PREF_ARCHAISMS, false)
         )
         val word = getLastWord(inputConnection) ?: run {
-            inputConnection.commitText(" ", 1)
+            inputConnection.commitText(suffix, 1)
             return
         }
         val replacement = PreRevolutionOrthography.replaceWord(word)
         if (replacement != word) {
             inputConnection.deleteSurroundingText(word.length, 0)
-            inputConnection.commitText(replacement + " ", 1)
+            inputConnection.commitText(replacement + suffix, 1)
         } else {
-            inputConnection.commitText(" ", 1)
+            inputConnection.commitText(suffix, 1)
         }
     }
 
@@ -135,25 +144,19 @@ class PreRevolutionKeyboard : InputMethodService(),
         }
     }
 
-    // Обязательные методы интерфейса
     override fun onPress(primaryCode: Int) {
-        // Короткая и ощутимая вибрация
+        val prefs = getSharedPreferences(PreRevolutionOrthography.PREFS_NAME, Context.MODE_PRIVATE)
+        if (!prefs.getBoolean(PreRevolutionOrthography.PREF_VIBRATION, true)) return
         try {
-            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator ?: return
+            if (!vibrator.hasVibrator()) return
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                // Используем EFFECT_CLICK - стандартный клик-эффект
-                vibrator.vibrate(
-                    VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK)
-                )
+                vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK))
             } else {
                 @Suppress("DEPRECATION")
-                vibrator.vibrate(10) // Короткая вибрация 10ms
+                vibrator.vibrate(10)
             }
-        } catch (e: Exception) {
-            // Игнорируем ошибки
-            //TODO сделать обработку вывода вмбрации на 13+
-        }
+        } catch (_: Exception) { }
     }
 
 
